@@ -408,7 +408,7 @@ with open(r'MLB/game_date_info1.csv', 'a', newline='', encoding="utf-8") as f:
 
 
 
-
+'''
 
 with open('lineups_all.csv', 'w') as f:  # Just use 'w' mode in 3.x
     w = csv.DictWriter(f, lineups_all.keys())
@@ -497,7 +497,7 @@ lineups = pd.DataFrame(np.column_stack([team_ini, team_starters, team_pos]), col
 pos_dict['position'] = team_pos.append(soup.find_all('td')[i-3].get_text())
 player_dict['batter'] = starting_player.append(soup.find_all('td')[i-4].get_text())
 
-'''
+
 temp, humidity, rain = [], [], []
 for cat in weather:
     if '°' in cat and 'H' in cat and cat.count('%') > 1:
@@ -520,8 +520,9 @@ for cat in weather:
         temp.append('75°')
         humidity.append('25%')
         rain.append('0%')
-'''        
+        
 
 
 driver.close()
 driver.quit()
+'''
