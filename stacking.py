@@ -4,6 +4,7 @@ import pandas as pd
 seed = 123
 np.random.seed(seed)
 
+# X: Independent Variables (player/team stats), y: Dependent (actual runs scored)
 X = pd.read_csv("MLB/X_sort.csv", encoding='latin-1')
 y = pd.read_csv("MLB/y_sort.csv", encoding='latin-1', names=['Score'])
 
@@ -11,6 +12,7 @@ from constant_variables import features_top_list
 X2 = X['Expected_Runs']
 X = X.drop('Expected_Runs', axis = 1)
 
+#Splitting the data into a training set and a test set(determine accuracy of the algo on data it hasn't seen)
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20, random_state = 0)
 '''
@@ -29,16 +31,22 @@ X_train = pca.fit_transform(X_train)
 X_test = pca.transform(X_test)
 explained_variance = pca.explained_variance_ratio_
 '''
+
+#Training the regression algorithm on the training set (It is basically trying to determine the importance of each variable )
+# Regression sums up the effect of the variables and spits out a prediction.  It's a continuous variable.
 # Fitting XGBoost to the Training set
 from xgboost import XGBRegressor
 classifier = XGBRegressor()
 classifier.fit(X_train, y_train)
 
+#Training the classification algorithm on the training set (It is basically trying to determine the importance of each variable )
+#In classification, you are trying to group things into neat catagories.  ex. Is it a monkey or a dog (discrete variable)
 # Fitting XGBoost to the Training set
 from xgboost import XGBClassifier
 classifier1 = XGBClassifier()
 classifier1.fit(X_train, y_train)
 
+# 3 methods of evaluating the prediction quality (mean absolute error, root mean squared error, correlation coefficient)
 def eval_metrics(y_test, y_pred):
     mae = np.round(abs(y_test.values - y_pred).mean(),decimals=2)
     rmse = (((y_test.values - y_pred)**2).mean())**(1/2)
@@ -59,6 +67,7 @@ y_pred_cls_test_rd = np.round(y_pred_cls_test)
 metrics = eval_metrics(y_test, y_pred_X_test_rd)
 metrics_class = eval_metrics(y_test, y_pred_cls_test_rd)
 
+# A method of testing your algorithm that splits data into small segments(batches) and averaging the mean of their accuracies
 # Applying k-Fold Cross Validation
 from sklearn.model_selection import cross_val_score
 accuracies = cross_val_score(estimator = classifier, X = X_train, y = y_train, cv = 10)
@@ -66,10 +75,18 @@ mean_acc = accuracies.mean()
 train_std = accuracies.std()
 classifier.evals_result
 
+# What variables are most important?  Higher the #, the greater the importance
 feature_importance = classifier1.feature_importances_
 #features = pd.Series(feature_importance, index = len(X_train[0]))
 #features_sorted = pd.Series(features.sort_values())
 
+
+# This is a neural network 
+# It runs through the data 2000 times adjusting the weights every 35 games
+# The dropout is used to prevent overfitting - training too closely to the training data at the expense of test accuracy
+# It drops out variables randomly
+# Output dim is the number of nodes in each layer
+# The goal is to reduce a cost function as much as possible (mean squared error)
 import keras
 from keras import optimizers
 from keras.models import Sequential
@@ -89,11 +106,11 @@ regressor1.add(Dropout(p=0.1))
 regressor1.add(Dense(output_dim = 75, init = 'uniform', activation = 'relu'))
 regressor1.add(Dropout(p=0.1))
 
-# Adding the second hidden layer
+# Adding the third hidden layer
 regressor1.add(Dense(output_dim = 60, init = 'uniform', activation = 'relu'))
 regressor1.add(Dropout(p=0.1))
 
-# Adding the third hidden layer
+# Adding the 4th hidden layer
 regressor1.add(Dense(output_dim = 45, init = 'uniform', activation = 'relu'))
 regressor1.add(Dropout(p=0.1))
 
