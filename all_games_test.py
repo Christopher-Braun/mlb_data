@@ -20,6 +20,12 @@ def get_team_league(team_ini):
     for ini, league in LEAGUE.items():
         if ini == team_ini:
             return league
+        
+def soup_search(tag, index, step):
+    # Line and location in line to pull data from
+    return soup.find_all(tag)[index + step].get_text()
+
+
 '''        
 def daily_lineups_pitch(df_saved):    
     #df = pd.read_csv("MLB/game_date_info1.csv", encoding='latin-1')
@@ -84,13 +90,14 @@ def separate_games(soup, games_total=None, all_lineups=None, scraped=0):
     team_away, team_home, expected_runs_away, actual_runs_away, expected_runs_home, actual_runs_home, weather = [], [], [], [], [], [], []
     for i,row in enumerate(soup.find_all('td')):
         if row.get_text() == 'View':
-            team_away.append(soup.find_all('td')[i+1].get_text())
-            team_home.append(soup.find_all('td')[i+4].get_text()[2:])
-            expected_runs_away.append(soup.find_all('td')[i+2].get_text().strip())
-            actual_runs_away.append(soup.find_all('td')[i+3].get_text().strip())
-            expected_runs_home.append(soup.find_all('td')[i+5].get_text().strip())
-            actual_runs_home.append(soup.find_all('td')[i+6].get_text().strip())
-            weather.append(soup.find_all('td')[i+9].get_text().strip())
+            team_away.append(soup_search('td', i, 1))
+            team_home.append(soup_search('td', i, 4)[2:])
+            expected_runs_away.append(soup_search('td', i, 2).strip())
+            actual_runs_away.append(soup_search('td', i, 3).strip())
+            expected_runs_home.append(soup_search('td', i, 5).strip())
+            actual_runs_home.append(soup_search('td', i, 6).strip())
+            weather.append(soup_search('td', i, 9).strip())    
+
             
     # Get and Format Date
     for table in soup.select('h1'):
@@ -165,26 +172,26 @@ def separate_games(soup, games_total=None, all_lineups=None, scraped=0):
     total, total_teams = [], []
     for i,row in enumerate(soup.find_all('td')):
         if row.get_text() == 'Totals':
-            if soup.find_all('td')[i-19].get_text() == 'Oliver Drake':
+            if soup_search('td', i, -19) == 'Oliver Drake':
                 print('BOOOYAAA')
-                total.append(soup.find_all('td')[i+5].get_text())
+                total.append(soup_search('td', i, 5))
                 total_teams.append('MIL')
-            elif soup.find_all('td')[i-19].get_text() == 'Matt Harvey':
-                total.append(soup.find_all('td')[i+5].get_text())
+            elif soup_search('td', i, -19) == 'Matt Harvey':
+                total.append(soup_search('td', i, 5))
                 total_teams.append('NYM')
-            elif soup.find_all('td')[i-19].get_text() == 'Buddy Baumann':
-                total.append(soup.find_all('td')[i+5].get_text())
+            elif soup_search('td', i, -19) == 'Buddy Baumann':
+                total.append(soup_search('td', i, 5))
                 total_teams.append('SD')                
-            elif soup.find_all('td')[i-19].get_text() == 'Wilmer Font':
-                total.append(soup.find_all('td')[i+5].get_text())
+            elif soup_search('td', i, -19) == 'Wilmer Font':
+                total.append(soup_search('td', i, 5))
                 total_teams.append('LAD')                    
-            elif soup.find_all('td')[i-19].get_text() == 'Enny Romero':
-                total.append(soup.find_all('td')[i+5].get_text())
+            elif soup_search('td', i, -19) == 'Enny Romero':
+                total.append(soup_search('td', i, 5))
                 total_teams.append('WAS')
             else:
-                print(soup.find_all('td')[i-19].get_text())
-                total.append(soup.find_all('td')[i+5].get_text())
-                total_teams.append(soup.find_all('td')[i-16].get_text())
+                print(soup_search('td', i, -19))
+                total.append(soup_search('td', i, 5))
+                total_teams.append(soup_search('td', i, -16))
                 
                 
                 
@@ -279,23 +286,23 @@ def separate_games(soup, games_total=None, all_lineups=None, scraped=0):
     starting_player, team_ini, team_starters, team_pos, player = [], [], [], [], []
     for i,row in enumerate(soup.find_all('td')):
         if row.get_text() == 'Y':
-            starting_player.append([soup.find_all('td')[i-4].get_text(), soup.find_all('td')[i-3].get_text(), soup.find_all('td')[i-1].get_text()])
-            team_pos.append(soup.find_all('td')[i-3].get_text())
-            team_ini.append(soup.find_all('td')[i-1].get_text())
-            team_starters.append(soup.find_all('td')[i-4].get_text())
+            starting_player.append([soup_search('td', i, -4), soup_search('td', i, -3), soup_search('td', i, -1)])
+            team_pos.append(soup_search('td', i, -3))
+            team_ini.append(soup_search('td', i, -1))
+            team_starters.append(soup_search('td', i, -4))
             #team_starters.append([starting_player, team_ini, team_pos])
-            print(soup.find_all('td')[i+20].get_text(),  soup.find_all('td')[i+18].get_text(), soup.find_all('td')[i-16].get_text(), soup.find_all('td')[i-18].get_text(), soup.find_all('td')[i-19].get_text(), soup.find_all('td')[i-21].get_text(), soup.find_all('td')[i-22].get_text(), soup.find_all('td')[i+15].get_text(), soup.find_all('td')[i+14].get_text(), soup.find_all('td')[i+17].get_text())
-            if int(soup.find_all('td')[i+20].get_text()) > 0 and int(soup.find_all('td')[i+20].get_text()) < 10 and soup.find_all('td')[i+18].get_text() != 'Y' and soup.find_all('td')[i-16].get_text() != 'Final':
-                starting_player.append([soup.find_all('td')[i+14].get_text(), soup.find_all('td')[i+15].get_text(), soup.find_all('td')[i+17].get_text()])
-                team_pos.append(soup.find_all('td')[i+15].get_text())
-                team_ini.append(soup.find_all('td')[i+17].get_text())
-                team_starters.append(soup.find_all('td')[i+14].get_text())
-            if soup.find_all('td')[i-16].get_text() != 'Final' and soup.find_all('td')[i-16].get_text() != '\xa0' and int(soup.find_all('td')[i-16].get_text()) > 0 and int(soup.find_all('td')[i-16].get_text()) < 10 and soup.find_all('td')[i-18].get_text() != 'Y':
-                starting_player.append([soup.find_all('td')[i-22].get_text(), soup.find_all('td')[i-21].get_text(), soup.find_all('td')[i-19].get_text()])
-                team_pos.append(soup.find_all('td')[i-21].get_text())
-                team_ini.append(soup.find_all('td')[i-19].get_text())
-                team_starters.append(soup.find_all('td')[i-22].get_text())
-    
+            print(soup_search('td', i, 20), soup_search('td', i, 18), soup_search('td', i, -16), soup_search('td', i, -18), soup_search('td', i, -19), soup_search('td', i, -21), soup_search('td', i, -22), soup_search('td', i, 15), soup_search('td', i, 14), soup_search('td', i, 17))
+            if int(soup_search('td', i, 20)) > 0 and int(soup_search('td', i, 20)) < 10 and soup_search('td', i, 18) != 'Y' and soup_search('td', i, -16) != 'Final':
+                starting_player.append([soup_search('td', i, 14), soup_search('td', i, 15), soup_search('td', i, 17)])
+                team_pos.append(soup_search('td', i, 15))
+                team_ini.append(soup_search('td', i, 17))
+                team_starters.append(soup_search('td', i, 14))
+            if soup_search('td', i, -16) != 'Final' and soup_search('td', i, -16) != '\xa0' and int(soup_search('td', i, -16)) > 0 and int(soup_search('td', i, -16)) < 10 and soup_search('td', i, -18) != 'Y':
+                starting_player.append([soup_search('td', i, -22), soup_search('td', i, -21), soup_search('td', i, -19)])
+                team_pos.append(soup_search('td', i, -21))
+                team_ini.append(soup_search('td', i, -19))
+                team_starters.append(soup_search('td', i, -22))
+
     # Convert Team Initials
     starting_player = list(map((lambda x:[x[0],x[1],get_team_ini(x[2])]), starting_player))
     
@@ -345,7 +352,7 @@ date = game_info[1]
 daily_lineups = game_info[2]
 lineups_all = game_info[3]
 
-while date != '08-27-2018':
+while date != '08-29-2018':
     elem1 = driver.find_element_by_name("BACK")
     elem1.click()
     time.sleep(20)
@@ -405,124 +412,3 @@ with open(r'MLB/game_date_info1.csv', 'a', newline='', encoding="utf-8") as f:
 
 
 
-
-
-
-'''
-
-with open('lineups_all.csv', 'w') as f:  # Just use 'w' mode in 3.x
-    w = csv.DictWriter(f, lineups_all.keys())
-    for key in w:
-        if key not in list(lineups_all.columns):
-            w.writeheader()
-            w.writerow(lineups_all)
-
-with open('MLB/lineups_all1.csv','w') as f:
-    w = csv.writer(f)
-    w.writerows(lineups_all.items())
-
-with open('lineups_all2.csv', 'w') as f:  # Just use 'w' mode in 3.x
-    w = csv.DictWriter(f, lineups_all)
-    w.writeheader()
-    w.writerows(lineups_all)
-
-pd.DataFrame(lineups_all).to_csv('MLB/lineups_all3.csv', index=False)
-
-
-
-
-s
-
-
-# Get game info
-i=0
-player_dict, pos_dict, team_dict, starters_dict = {}, {}, {}, {}
-starting_player, team_ini, team_starters, team_pos, player = [], [], [], [], []
-for i,row in enumerate(soup.find_all('td')):
-    if row.get_text() == 'Y':
-        starting_player.append([soup.find_all('td')[i-4].get_text(), soup.find_all('td')[i-3].get_text(), soup.find_all('td')[i-1].get_text()])
-        team_pos.append(soup.find_all('td')[i-3].get_text())
-        team_ini.append(soup.find_all('td')[i-1].get_text())
-        team_starters.append(soup.find_all('td')[i-4].get_text())
-        #team_starters.append([starting_player, team_ini, team_pos])
-
-
-starting_player = list(map((lambda x:[x[0],x[1],get_team_ini(x[2])]), starting_player))
-
-
-names, pos, teams, starters_dict, player_list, player_dict = [],[],[],{},[],{}
-i,k=0,0
-tm = starting_player[0][2]
-for player,position,team in starting_player:
-    if team == tm:
-        names.append(player)
-        pos.append(position)
-        teams.append(team)
-        print(i, player,position,team)
-    else:
-        for name,po in zip(names,pos):
-            player_dict[name] = po
-        player_list.append(player_dict)
-        starters_dict[tm] = player_dict
-        names,pos,teams,player_dict = [], [], [],{}
-        names.append(player)
-        pos.append(position)
-        teams.append(team)
-        tm = team
-for name,po in zip(names,pos):
-    player_dict[name] = po
-player_list.append(player_dict)
-starters_dict[tm] = player_dict
-        
-lineups_day = {date:starters_dict}
-
-# Create Dataframes
-lineups = pd.DataFrame(np.column_stack([team_ini, team_starters, team_pos]), columns = ['team_ini', 'starters', 'team_pos'])
-
-            
-#player_list,player_dict = [],{}        
-        
-        list([names, pos])
-    starters_dict[team] = {name: {'position' : pos}}).append(starters_dict[team])
-        player_dict[soup.find_all('td')[i-4].get_text()] = {'position' : soup.find_all('td')[i-3].get_text(), 'team' : soup.find_all('td')[i-1].get_text()}
-        if len(team_dict[soup.find_all('td')[i-1].get_text()].items()) > 0:
-            team_dict[soup.find_all('td')[i-1].get_text()] = list({soup.find_all('td')[i-4].get_text() : player_dict[soup.find_all('td')[i-4].get_text()]}).append(team_dict[soup.find_all('td')[i-1].get_text()])
-        else:
-            team_dict[soup.find_all('td')[i-1].get_text()] = player_dict[soup.find_all('td')[i-4].get_text()]
-
-        #team_dict[team_ini.append(soup.find_all('td')[i-1].get_text())]['batter'] = starting_player.append(soup.find_all('td')[i-4].get_text())
-        #team_dict[team_ini.append(soup.find_all('td')[i-1].get_text())]['position'] = team_pos.append(soup.find_all('td')[i-3].get_text())
-        #starting_player = []
-
-pos_dict['position'] = team_pos.append(soup.find_all('td')[i-3].get_text())
-player_dict['batter'] = starting_player.append(soup.find_all('td')[i-4].get_text())
-
-
-temp, humidity, rain = [], [], []
-for cat in weather:
-    if '°' in cat and 'H' in cat and cat.count('%') > 1:
-        temp.append(cat.split()[0])
-        humidity.append(cat.split()[1])
-        rain.append(cat.split()[2])
-    elif '°' in cat and 'H' in cat and cat.count('%') <= 1:
-        temp.append(cat.split()[0])
-        humidity.append(cat.split()[1])
-        rain.append('0%')
-    elif '°' in cat and 'H' not in cat and cat.count('%') <= 1:
-        temp.append(cat.split()[0])
-        humidity.append('25%')
-        rain.append(cat.split()[2])
-    elif '°' not in cat and 'H' in cat and cat.count('%') > 1:
-        temp.append('75°')
-        humidity.append(cat.split()[1])
-        rain.append(cat.split()[2])
-    else:
-        temp.append('75°')
-        humidity.append('25%')
-        rain.append('0%')
-        
-
-
-driver.close()
-driver.quit()
-'''
