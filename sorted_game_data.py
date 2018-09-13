@@ -4,6 +4,8 @@ from collections import OrderedDict, defaultdict
 from mlb_classes1 import Players
 from open_dict import daily_lineups_pitch, date
 
+# Need to fix information on traded players (Team, Park, Defensive Data)
+
 df = pd.read_csv("MLB/game_date_info1.csv", encoding='latin-1')
 df['date'] = list(map((lambda x:date(x)), df['date']))
 df['Date_Team'] = list(map((lambda x,y:x + ' ' + y), df['date'], df['team_home']))
@@ -596,6 +598,7 @@ y.to_csv("C:/Users/mrcrb/PythonScripts/MLB/MLB/y_sort.csv", sep=',', encoding='u
 X1.to_csv("C:/Users/mrcrb/PythonScripts/MLB/MLB/X1_sort.csv", sep=',', encoding='utf-8', index=False)
 
 
+# Compiling future game data that will be predicted
 df5 = pd.read_csv("MLB/future_games.csv", encoding='latin-1')
 ones = pd.DataFrame(np.ones((len(df5),12)), columns = ['pitcher_IP', 'pitcher_PA', 'pitcher_SO', 'pitcher_DRA', 'pitcher_ERA', 'pitcher_PPF', 'pitcher_VORP', 'pitcher_FIP', 'pitcher_PVORP', 'pitcher_PWARP', 'pitcher_BASES_VS_AB', 'pitcher_hit_mult'])
 df5 = pd.concat([df5,ones],axis=1)
@@ -634,14 +637,14 @@ bat_splits = ['bat_SO', 'bat_RBI', 'bat_DP', 'bat_FB%', 'bat_GB%', 'bat_LD%', 'b
 
 ones = pd.DataFrame(np.ones((16,len(bat_splits))), columns = ['bat_SO', 'bat_RBI', 'bat_DP', 'bat_FB%', 'bat_GB%', 'bat_LD%', 'bat_POP%', 'bat_ISO', 'bat_AVG', 'bat_OBP', 'bat_SLG', 'bat_TAV', 'batter_BASES_VS_AB',	'hit_mult'])
 df5 = pd.concat([df5,ones],axis=1)
-
+'''
 for tm,hd in zip(df5['Team_Bat_Ini'], df5['Throws']):
     for i in [ 'bat_SO', 'bat_RBI', 'bat_DP', 'bat_FB%', 'bat_GB%', 'bat_LD%', 'bat_POP%', 'bat_ISO', 'bat_AVG', 'bat_OBP', 'bat_SLG', 'bat_TAV', 'batter_BASES_VS_AB',	'hit_mult']:
         df5[i][df5['Team_Bat_Ini']==tm][df5['Throws']==hd] = round(float(game_logs2[i][game_logs2['Team_Bat']==tm][game_logs2['pitcher_hand']==hd].values.mean()),2)
-
-
-
-df5[i][df5['Team_Bat_Ini']==tm][df5['Throws']==hd].values[0]=2
+'''
+for tm,hd in zip(df5['Team_Bat_Ini'], df5['Throws']):
+    for i in [ 'bat_SO', 'bat_RBI', 'bat_DP', 'bat_FB%', 'bat_GB%', 'bat_LD%', 'bat_POP%', 'bat_ISO', 'bat_AVG', 'bat_OBP', 'bat_SLG', 'bat_TAV', 'batter_BASES_VS_AB',	'hit_mult']:
+        df5[i][df5['Team_Bat_Ini']==tm] = round(float(game_logs2[i][game_logs2['Team_Bat']==tm][game_logs2['pitcher_hand']==hd].values.mean()),2)
 
 
 
@@ -666,13 +669,59 @@ df5 = pd.concat([df5,ones],axis=1)
 
 for tm,hd in zip(df5['Team_Bat_Ini'], df5['Throws']):
     for i in ['G_batter', 'PA_batter', 'R_batter', 'TB_batter', 'SO_batter', 'RBI_batter', 'DP_batter', 'FB%_batter', 'GB%_batter', 'LD%_batter', 'POP%_batter', 'ISO_batter', 'AVG_batter', 'OBP_batter', 'SLG_batter', 'TAV_batter', 'BASES_VS_AB_batter', 'SDTHB_BAT']:
+        df5[i][df5['Team_Bat_Ini']==tm] = round(float(game_logs2[i][game_logs2['Team_Bat']==tm][game_logs2['pitcher_hand']==hd].values[0]),2)
+
+'''
+for tm,hd in zip(df5['Team_Bat_Ini'], df5['Throws']):
+    for i in ['G_batter', 'PA_batter', 'R_batter', 'TB_batter', 'SO_batter', 'RBI_batter', 'DP_batter', 'FB%_batter', 'GB%_batter', 'LD%_batter', 'POP%_batter', 'ISO_batter', 'AVG_batter', 'OBP_batter', 'SLG_batter', 'TAV_batter', 'BASES_VS_AB_batter', 'SDTHB_BAT']:
         df5[i][df5['Team_Bat_Ini']==tm][df5['Throws']==hd] = round(float(game_logs2[i][game_logs2['Team_Bat']==tm][game_logs2['pitcher_hand']==hd].values[0]),2)
+
 
 batt, batt2 = [], []
 for tm,hd in zip(df5['Team_Bat_Ini'], df5['Throws']):
     for i in ['G_batter', 'PA_batter', 'R_batter', 'TB_batter', 'SO_batter', 'RBI_batter', 'DP_batter', 'FB%_batter', 'GB%_batter', 'LD%_batter', 'POP%_batter', 'ISO_batter', 'AVG_batter', 'OBP_batter', 'SLG_batter', 'TAV_batter', 'BASES_VS_AB_batter', 'SDTHB_BAT']:
        batt.append( round(float(game_logs2[i][game_logs2['Team_Bat']==tm][game_logs2['pitcher_hand']==hd].values.mean()),2))
        batt2.append(i)
+'''
+
+game_logs2['team_ini'][game_logs2['Team_Pitch']=='MATT HARVEY'] = 'CIN'
+
+side_pit_cols = ['H_SIDE_pit', '1B_SIDE_pit', '2B_SIDE_pit', '3B_SIDE_pit', 'HR_SIDE_pit', 'TB_SIDE_pit', 'SO_SIDE_pit', 'BB_SIDE_pit', 'HBP_SIDE_pit', 'SF_SIDE_pit', 'SH_SIDE_pit', 'DP_SIDE_pit', 'FB%_SIDE_pit', 'GB%_SIDE_pit', 'LD%_SIDE_pit', 'POP%_SIDE_pit', 'ISO_SIDE_pit', 'AVG_SIDE_pit', 'OBP_SIDE_pit', 'SLG_SIDE_pit', 'TAV_SIDE_pit', 'DRA_SIDE_pit', 'DRA-_SIDE_pit', 'CFIP_SIDE_pit', 'BASES_VS_AB_pit']
+ones = pd.DataFrame(np.ones((16,len(side_pit_cols))), columns = side_pit_cols)
+df5 = pd.concat([df5,ones],axis=1)
+
+for tm,hd in zip(df5['Pitcher'], df5['team_ini']):
+    for i in side_pit_cols:
+        df5[i][df5['Pitcher']==tm] = round(float(game_logs2[i][game_logs2['Team_Pitch']==tm.upper()][game_logs2['team_ini']==hd].values[0]),2)
+
+
+
+bullpen_cat = ['K/9', 'BB/9', 'K/BB', 'HR/9', 'K%', 'BB%', 'K-BB%', 'AVG', 'WHIP', 'BABIP', 'LOB%',
+ 'ERA-', 'FIP-', 'xFIP-', 'ERA', 'FIP', 'E-F', 'xFIP', 'SIERA']
+ones = pd.DataFrame(np.ones((16,len(bullpen_cat))), columns = bullpen_cat)
+df5 = pd.concat([df5,ones],axis=1)
+
+for tm,hd in zip(df5['Pitcher'], df5['team_ini']):
+    for i in bullpen_cat:
+        df5[i][df5['Pitcher']==tm] = round(float(game_logs2[i][game_logs2['Team_Pitch']==tm.upper()][game_logs2['team_ini']==hd].values[0]),2)
+
+
+monster_cols = ['Expected_Runs', 'Temp', 'Humidity', 'Rain']
+ones = pd.DataFrame(np.ones((16,len(bat_split))), columns = monster_cols)
+df5 = pd.concat([df5,ones],axis=1)
+
+X_new = X[X.columns[list(X.columns).index('pitcher_SO'):]]
+df5_new = df5[df5.columns[list(df5.columns).index('pitcher_SO'):]]
+
+df5_new = df5_new.drop(['team_ini', 'Team_Bat_Ini', 'G_batter', 'PA_batter'], axis=1)
+
+
+X_new.to_csv("C:/Users/mrcrb/PythonScripts/MLB/MLB/X_new.csv", sep=',', encoding='utf-8', index=False)
+df5_new.to_csv("C:/Users/mrcrb/PythonScripts/MLB/MLB/df5_new.csv", sep=',', encoding='utf-8', index=False)
+
+
+
+
 
 
 
