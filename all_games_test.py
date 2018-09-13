@@ -81,10 +81,12 @@ def separate_games(soup, games_total=None, all_lineups=None, scraped=0):
         else:
             index.append(i)
             i+=1
-            
+    '''        
     if len(index)>0:
         for ind in index: 
             pitch_team.pop(ind)
+    '''        
+    [pitch_team.pop(ind) for ind in index if len(index)>0]
             
     # Get game info
     team_away, team_home, expected_runs_away, actual_runs_away, expected_runs_home, actual_runs_home, weather = [], [], [], [], [], [], []
@@ -100,18 +102,17 @@ def separate_games(soup, games_total=None, all_lineups=None, scraped=0):
 
             
     # Get and Format Date
-    for table in soup.select('h1'):
-         date = table.get_text()[-9:]
-    
+    date = [table.get_text()[-9:] for table in soup.select('h1')][0]
     date = date.replace('/', '-')
     date = date.strip()
+    
     if date[1] == '-':
         date = '0'+ date
     if date[4] == '-':
         date = date[:3] +'0'+ date[3:]
+        
     dates = []
-    for i in team_away:
-        dates.append(date)
+    [dates.append(date) for i in team_away]
         
             
     # for games before trade (need to add a date arguement)        
