@@ -75,22 +75,28 @@ class Game(object):
         pass
 
 from collections import defaultdict
-# Create lineup dictionary for each team on day of most recent scraping
-teams = defaultdict(list)
-for i in X.Team.unique():
-    [teams[i].append(Player(p).return_player()) for p in Lineup(X,i)]
 
-# Create lineup list for each team on day of most recent scraping
-teams_list = defaultdict(list)
-for i in X.Team.unique():
-    [teams_list[i].append(Player(p)) for p in Lineup(X,i)]
+def daily_lineup_dict(data):
+    # Create lineup dictionary for each team on day of most recent scraping
+    teams = defaultdict(list)
+    for i in data.Team.unique():
+        [teams[i].append(Player(p).return_player()) for p in Lineup(data,i)]
+    return teams
 
-# Create dictionary of games with info from game class
-games1 = defaultdict(list)
-for game in game_df.iterrows():
-    games1[game[1].game_id].append(Game(game[1]))
+def daily_lineup(data):
+    # Create lineup list for each team on day of most recent scraping
+    teams_list = defaultdict(list)
+    for i in data.Team.unique():
+        [teams_list[i].append(Player(p)) for p in Lineup(data,i)]
+    return teams_list
 
-        
+def games_dict(data):
+    # Create dictionary of games with info from game class
+    games = defaultdict(list)
+    for game in data.iterrows():
+        games[game[1].game_id].append(Game(game[1]))
+    return games
+
 def add_lineups(data):
     # Add home and away lineups
     for key in data.keys():
@@ -99,5 +105,9 @@ def add_lineups(data):
             game.away_lineup = teams_list[game.away_team]
     return data
 
-games1 = add_lineups(games1)
+
+teams = daily_lineup_dict(X)
+teams_list = daily_lineup(X)
+games = games_dict(game_df)
+games = add_lineups(games)
         
