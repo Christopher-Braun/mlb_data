@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-X = pd.read_csv("game_bat_data.csv", encoding='latin-1')
-game_df = pd.read_csv("game_data.csv", encoding='latin-1')
+#X = pd.read_csv("game_bat_data.csv", encoding='latin-1')
+#game_df = pd.read_csv("game_data.csv", encoding='latin-1')
 
 
 class Lineup(object):
@@ -97,17 +97,33 @@ def games_dict(data):
         games[game[1].game_id].append(Game(game[1]))
     return games
 
-def add_lineups(data):
+def add_lineups(data, teams_list):
     # Add home and away lineups
     for key in data.keys():
         for game in data[key]:
-            game.home_lineup = teams_list[game.home_team]
-            game.away_lineup = teams_list[game.away_team]
+            if len(data[key])<2:
+                game.home_lineup = teams_list[game.home_team]
+                game.away_lineup = teams_list[game.away_team]
+            else:
+                game.home_lineup = [teams_list[game.home_team][0], teams_list[game.home_team][1]]
+                game.away_lineup = [teams_list[game.away_team][0], teams_list[game.away_team][1]]
     return data
 
-
+def separate_double_headers(data):
+    players = []
+    for team in data:
+        for player in data[team]:
+            if player.player in players:
+                data[team] = [data[team][:len(players)], data[team][len(players):]]
+                players = []
+                continue
+            else:
+                players.append(player.player)
+    return data
+    
+'''
 teams = daily_lineup_dict(X)
 teams_list = daily_lineup(X)
 games = games_dict(game_df)
-games = add_lineups(games)
-        
+games = add_lineups(games, teams_list)
+'''        
