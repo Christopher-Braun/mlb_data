@@ -69,18 +69,33 @@ class Game(object):
         self.away_runs = data.aR_Away
         self.away_predict_runs = data.pR_Away
         self.game_status = data.Status
+        self.home_lineup = []
+        self.away_lineup = []
         
         pass
 
 from collections import defaultdict
+# Create lineup dictionary for each team on day of most recent scraping
 teams = defaultdict(list)
 for i in X.Team.unique():
     [teams[i].append(Player(p).return_player()) for p in Lineup(X,i)]
 
+# Create lineup list for each team on day of most recent scraping
 teams_list = defaultdict(list)
 for i in X.Team.unique():
     [teams_list[i].append(Player(p)) for p in Lineup(X,i)]
 
+# Create dictionary of games with info from game class
 games1 = defaultdict(list)
 for game in game_df.iterrows():
     games1[game[1].game_id].append(Game(game[1]))
+
+# Add home and away lineups
+for key in games1.keys():
+    for game in games1[key]:
+        game.home_lineup = teams_list[game.home_team]
+        game.away_lineup = teams_list[game.away_team]
+        
+
+        
+        
