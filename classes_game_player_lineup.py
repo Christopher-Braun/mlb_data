@@ -90,12 +90,14 @@ games1 = defaultdict(list)
 for game in game_df.iterrows():
     games1[game[1].game_id].append(Game(game[1]))
 
-# Add home and away lineups
-for key in games1.keys():
-    for game in games1[key]:
-        game.home_lineup = teams_list[game.home_team]
-        game.away_lineup = teams_list[game.away_team]
         
+def add_lineups(data):
+    # Add home and away lineups
+    for key in data.keys():
+        for game in data[key]:
+            game.home_lineup = teams_list[game.home_team]
+            game.away_lineup = teams_list[game.away_team]
+    return data
 
-        
+games1 = add_lineups(games1)
         
