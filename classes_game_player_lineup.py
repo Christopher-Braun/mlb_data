@@ -72,7 +72,27 @@ class Game(object):
         self.home_lineup = []
         self.away_lineup = []
         
-        pass
+        def __iter__(self):
+            """Allows object to be iterated over."""
+            for x in self.data:
+                yield x
+        
+        def __str__(self):
+            return [self.game_id, 
+                    self.home_team, 
+                    self.away_team, 
+                    self.time,
+                    self.temp,
+                    self.humidity,
+                    self.rain,
+                    self.home_runs,
+                    self.home_predict_runs,
+                    self.away_runs,
+                    self.away_predict_runs,
+                    self.game_status,
+                    self.home_lineup,
+                    self.away_lineup]
+        
 
 from collections import defaultdict
 
@@ -105,22 +125,55 @@ def add_lineups(data, teams_list):
                 game.home_lineup = teams_list[game.home_team]
                 game.away_lineup = teams_list[game.away_team]
             else:
-                game.home_lineup = [teams_list[game.home_team][0], teams_list[game.home_team][1]]
-                game.away_lineup = [teams_list[game.away_team][0], teams_list[game.away_team][1]]
+                game.home_lineup = teams_list[game.home_team][0]
+                game.away_lineup = teams_list[game.away_team][0]
+                game.home_lineup = teams_list[game.home_team][1]
+                game.away_lineup = teams_list[game.away_team][1]
+
     return data
 
 def separate_double_headers(data):
-    players = []
     for team in data:
+        players = []
         for player in data[team]:
             if player.player in players:
                 data[team] = [data[team][:len(players)], data[team][len(players):]]
                 players = []
-                continue
             else:
                 players.append(player.player)
     return data
+
+# Trying to figure out why I can't iterate
+for game in games:
+    if len(games[game])<2:
+        for day in games[game]:
+            print('Nope')
+            #game.home_lineup = teams_list[game.home_team]
+            #game.away_lineup = teams_list[game.away_team]
+    else:
+        for day in games[game]:
+            if game1 == game_id:
+                game1 = day.game_id
+            print(day.__dict__)
+            print(game.index())
+            print(game.exec())
+            
+            
+            #print(game.__subclasses__())
+            #game.home_lineup = teams_list[game.home_team][0]
+            #game.away_lineup = teams_list[game.away_team][0]
+        for game in games[key][1]:
+            print(game)
+            #game.home_lineup = teams_list[game.home_team][1]
+            #game.away_lineup = teams_list[game.away_team][1]
+            #game[0].home_lineup = teams_list[game[0].home_team][0]
+            #game[0].away_lineup = teams_list[game[0].away_team][0]
+            #game[1].home_lineup = teams_list[game[1].home_team][1]
+            #game[1].away_lineup = teams_list[game[1].away_team][1]
+
     
+for game in games:
+    print(games[game][0])      
 '''
 teams = daily_lineup_dict(X)
 teams_list = daily_lineup(X)

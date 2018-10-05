@@ -140,12 +140,18 @@ def main():
         teams_list = daily_lineup(bat_df)
         teams_list = separate_double_headers(teams_list)
         games = games_dict(game_df)
+        
+        # Add lineups to Game classes (struggling with double headers)
+        # Double header games have a large teams_list (2 teams)
+        # My solution was to split into 2 teams at the point a player in game 1 comes up a 2nd time in teams_list
+        # Kind of a weak soln
         games = add_lineups(games, teams_list)
         
+        '''
         # Add Dataframes
         for game in games:
             games_total[game] = games[game]
-        
+        '''
         # Save Dataframes
         bat_df.to_csv('game_bat_data.csv', index=False)
         pitch_df.to_csv('game_pitch_data.csv', index=False)
