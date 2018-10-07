@@ -3,7 +3,7 @@ import time
 from selenium import webdriver
 import pandas as pd
 import re
-from classes_game_player_lineup import Game, Player, Lineup, daily_lineup_dict, daily_lineup, games_dict, add_lineups, separate_double_headers
+from classes_game_player_lineup import Game, Player, Pitcher, Lineup, daily_lineup_dict, daily_lineup, games_dict, add_lineups, separate_double_headers, pitchers_dict, add_starting_pitcher2, add_starting_pitcher
 from collections import defaultdict
 
 
@@ -42,9 +42,9 @@ def fix_home(data):
         d['Home'] = d['Home'].replace('@ ', '')
     return data
 
-def create_game_id(data, date):
+def create_game_id(data, date, team = 'Home'):
     for d in data:
-        d['game_id'] = str(date) + str(d['Home'])
+        d['game_id'] = str(date) + str(d[team])
     return data
 
 def add_game_date(data, date):
@@ -86,9 +86,7 @@ def main():
        # Game Data
         table1_id_xpath = "//table[@class='table table-bordered table-hover table-sm base-td-small datatable ml-0']"
         table_id_xpath = "//table[@class='table table-bordered table-hover table-sm base-td-small datatable ml-0 nowraptable ']"
-        game_list = []
-        batter_list = []
-        pitcher_list = []
+        game_list, batter_list, pitcher_list = [], [], []
     
         # Date Data
         date = "//form[@id='form1']/div[4]/h1"
@@ -132,7 +130,7 @@ def main():
         
         # Create Game Id
         game_data = create_game_id(game_data, current_date)
-        #game_pitch_data = create_game_id(game_pitch_data, current_date)
+        game_pitch_data = create_game_id(game_pitch_data, current_date, team = 'Team')
         
         # Create Dataframe
         bat_df = pd.DataFrame(game_bat_data)
@@ -143,14 +141,12 @@ def main():
         teams_list = daily_lineup(bat_df)
         teams_list = separate_double_headers(teams_list)
         games = games_dict(game_df)
+        #pitchers = pitchers_dict(pitch_df)
         
-        # Add lineups to Game classes (struggling with double headers)
-        # Double header games have a large teams_list (2 teams)
-        # My solution was to split into 2 teams at the point a player in game 1 comes up a 2nd time in teams_list
-        # Kind of a weak soln
+        # Add lineup and starting pitcher info to game info
         games = add_lineups(games, teams_list)
         games = add_starting_pitcher(games, pitch_df)
-        
+        games = add_starting_pitcher2(games, pitch_df)
 
         # Add Dataframes
         for game in games:
