@@ -71,12 +71,16 @@ class Game(object):
         self.game_status = data.Status
         self.home_lineup = []
         self.away_lineup = []
+        self.starting_pitcher = str()
         
         def __iter__(self):
             """Allows object to be iterated over."""
             for x in self.data:
                 yield x
-        
+        '''
+        def __iter__(self):
+            return self
+        '''
         def __str__(self):
             return [self.game_id, 
                     self.home_team, 
@@ -91,7 +95,8 @@ class Game(object):
                     self.away_predict_runs,
                     self.game_status,
                     self.home_lineup,
-                    self.away_lineup]
+                    self.away_lineup,
+                    self.starting_pitcher]
         
 
 from collections import defaultdict
@@ -120,16 +125,19 @@ def games_dict(data):
 def add_lineups(data, teams_list):
     # Add home and away lineups
     for key in data.keys():
+        i = 1
         for game in data[key]:
             if len(data[key])<2:
                 game.home_lineup = teams_list[game.home_team]
                 game.away_lineup = teams_list[game.away_team]
             else:
-                game.home_lineup = teams_list[game.home_team][0]
-                game.away_lineup = teams_list[game.away_team][0]
-                game.home_lineup = teams_list[game.home_team][1]
-                game.away_lineup = teams_list[game.away_team][1]
-
+                if i == 1:
+                    game.home_lineup = teams_list[game.home_team][0]
+                    game.away_lineup = teams_list[game.away_team][0]
+                    i+=1
+                else:
+                    game.home_lineup = teams_list[game.home_team][1]
+                    game.away_lineup = teams_list[game.away_team][1]
     return data
 
 def separate_double_headers(data):
@@ -137,12 +145,35 @@ def separate_double_headers(data):
         players = []
         for player in data[team]:
             if player.player in players:
-                data[team] = [data[team][:len(players)], data[team][len(players):]]
+                l = len(players)
+                team1 = data[team][:len(players)]
+                team2 = data[team][len(players):]
+                data[team] = [team1, team2]
+                print(team1[0].player, team2[0].player, l, team1[9].player, team2[9].player)
                 players = []
+                break
             else:
                 players.append(player.player)
     return data
 
+def add_starting_pitcher(data, pitchers):
+    # Add home and away lineups
+    for key in data.keys():
+        i = 1
+        for game in data[key]:
+            if len(data[key])<2:
+                game.starting_pitcher = pitchers['Name'][pitchers['Pos']=='SP'][pitchers['Team']==game.home_team].iloc[0]
+            else:
+                if i == 1:
+                    game.starting_pitcher = pitchers['Name'][pitchers['Pos']=='SP'][pitchers['Team']==game.home_team].iloc[0]
+                    print(game.starting_pitcher)
+                    i+=1
+                else:
+                    game.starting_pitcher = pitchers['Name'][pitchers['Pos']=='SP'][pitchers['Team']==game.home_team].iloc[1]
+    return data
+
+
+'''
 # Trying to figure out why I can't iterate
 for game in games:
     if len(games[game])<2:
@@ -152,6 +183,7 @@ for game in games:
             #game.away_lineup = teams_list[game.away_team]
     else:
         for day in games[game]:
+            print(day.away_lineup)
             if game1 == game_id:
                 game1 = day.game_id
             print(day.__dict__)
@@ -173,7 +205,9 @@ for game in games:
 
     
 for game in games:
-    print(games[game][0])      
+    print(games[game][0])   
+    
+'''
 '''
 teams = daily_lineup_dict(X)
 teams_list = daily_lineup(X)

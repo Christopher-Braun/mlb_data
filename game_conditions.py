@@ -125,11 +125,14 @@ def main():
         game_bat_data = add_game_date(game_bat_data, current_date)
         game_pitch_data = add_game_date(game_pitch_data, current_date)
         
-        # Split & Format Weather Data, Format Home and Create Game Id
+        # Split & Format Weather Data, Format Home
         m, n, p = '[0-9]{1,3}(?=°)', 'H[0-9]{1,3}%', '\s+[0-9]{1,3}%|(?<=H[0-9][0-9]%)'
         game_data = fix_weather(game_data, m, n, p)
         game_data = fix_home(game_data)
+        
+        # Create Game Id
         game_data = create_game_id(game_data, current_date)
+        #game_pitch_data = create_game_id(game_pitch_data, current_date)
         
         # Create Dataframe
         bat_df = pd.DataFrame(game_bat_data)
@@ -146,12 +149,13 @@ def main():
         # My solution was to split into 2 teams at the point a player in game 1 comes up a 2nd time in teams_list
         # Kind of a weak soln
         games = add_lineups(games, teams_list)
+        games = add_starting_pitcher(games, pitch_df)
         
-        '''
+
         # Add Dataframes
         for game in games:
             games_total[game] = games[game]
-        '''
+
         # Save Dataframes
         bat_df.to_csv('game_bat_data.csv', index=False)
         pitch_df.to_csv('game_pitch_data.csv', index=False)
